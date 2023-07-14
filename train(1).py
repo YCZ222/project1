@@ -12,6 +12,7 @@ from tqdm import tqdm
 ####### download "github desktop"
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print("use GPU:", torch.cuda.is_available())
 
 # hyper-parameter
 class_num = 27  
@@ -37,13 +38,13 @@ def seed_all(seed_value):
 seed_all(seed)
 
 # dataset
-train_data = "train_data"
-eval_data = "eval_data"
-test_data = "test_data"
-csvpath = 'artemis_dataset_release_v0.csv'
-train_dataset = MyDataset(csv_path=csvpath, img_dir=train_data)
-eval_dataset = MyDataset(csv_path=csvpath, img_dir=eval_data)
-test_dataset = MyDataset(csv_path=csvpath, img_dir=test_data)
+train_data = "/home/acer/文档/project/art_images_classification/project1/train.txt"
+eval_data = "/home/acer/文档/project/art_images_classification/project1/eval.txt"
+test_data = "/home/acer/文档/project/art_images_classification/project1/test.txt"
+csvpath = "/home/acer/文档/project/art_images_classification/project1/artemis_dataset_release_v0.csv"
+train_dataset = MyDataset(csv_path=csvpath, img_txt=train_data)
+eval_dataset = MyDataset(csv_path=csvpath, img_txt=eval_data)
+test_dataset = MyDataset(csv_path=csvpath, img_txt=test_data)
 # split train/val/test  60000+/5000/5000
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 eval_loader = DataLoader(eval_dataset,batch_size=batch_size,shuffle=False)
@@ -52,9 +53,7 @@ test_loader = DataLoader(test_dataset,batch_size=batch_size,shuffle=False)
 
 # model
 train_model = ResNet(class_num=class_num)
-eval_test_model = ResNet_fix(class_num=class_num)
 train_model.to(device)
-eval_test_model.to(device)
 
 
 # learning
@@ -68,7 +67,7 @@ for epoch in tqdm(range(epochs)):
     train_model.train()
     train_loss = 0.0
 
-    for images, labels in train_loader:
+    for images, labels in tqdm(train_loader):
         images = images.to(device)
         labels = labels.to(device)
         outputs = train_model(images)
@@ -94,7 +93,7 @@ for epoch in tqdm(range(epochs)):
     total = 0
 
     with torch.no_grad():
-        for images, labels in eval_loader:
+        for images, labels in tqdm(eval_loader):
             images = images.to(device)
             labels = labels.to(device)
 
@@ -120,7 +119,7 @@ for epoch in tqdm(range(epochs)):
     total = 0
     
     with torch.no_grad():
-        for images, labels in test_loader:
+        for images, labels in tqdm(test_loader):
             images = images.to(device)
             labels = labels.to(device)
 
